@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pantalla Principal - Mesas y Boxes</title>
+    <link rel="stylesheet" href="../static/CSS/indexPrincipal.css">
+</head>
+<body>
+    <header>
+        <h1>Pantalla Principal - Mesas y Boxes</h1>
+    </header>
+
+    <div class="container">
+        <div class="buttons">
+            <a href="/add_mesasyboxes">
+                <button>Crear Registro</button>
+            </a>
+            
+            <!-- Botones para filtrar registros sin recargar la página -->
+            <button onclick="filtrarProductos('box')">Mostrar Boxes</button>
+            <button onclick="filtrarProductos('mesa')">Mostrar Mesas</button>
+
+
+        </div>
+
+        <!-- Mensaje para indicar el tipo de registros mostrados -->
+        {% if request.path == '/filtrar/box' %}
+            <h2>Mostrando solo Boxes</h2>
+        {% elif request.path == '/filtrar/mesa' %}
+            <h2>Mostrando solo Mesas</h2>
+        {% else %}
+            <h2>Mostrando todos los registros</h2>
+        {% endif %}
+
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Tipo</th>
+                    <th>Nombre</th>
+                    <!--<th>Descripción</th> -->
+                    <th>Precio Regular</th>
+                    <th>Reserva</th>
+                    <th>Promoción</th>
+                    <th>Capacidad</th>
+                    <th>Contenido</th>
+                    <th>Estado</th>
+                    <th>Ubicación</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for producto in productos | reverse %}
+                <tr>
+                    <td>{{ producto[1] }}</td> <!-- Tipo -->
+                    <td>{{ producto[2] }}</td> <!-- Nombre -->
+                    <!--<td>{{ producto[3] }}</td> Descripción -->
+                    <td>S/. {{ producto[4] }}</td> <!-- Precio Regular -->
+                    <td>S/. {{ producto[10] }}</td>
+                    <td>{{ 'Sí' if producto[5] else 'No' }}</td> <!-- Promoción -->
+                    <td>{{ producto[6] or 'N/A' }}</td> <!-- Capacidad -->
+                    <td>{{ producto[7] or 'N/A' }}</td> <!-- Contenido -->
+                    <td>{{ producto[8] }}</td> <!-- Estado -->
+                    <td>
+                        {% if producto[9] %}
+                            <img src="{{ producto[9] }}" alt="Imagen de ubicación">
+                        {% else %}
+                            Sin ubicación
+                        {% endif %}
+                    </td>
+                    <td>
+                        <!-- Opciones de acciones como editar/eliminar -->
+                        <a href="/edit/{{ producto[0] }}">Editar</a> |
+                        <a href="#" onclick="confirmarEliminacion('{{ producto[0] }}')">Eliminar
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <script src="../static/js/eliminacion_ventana.js"></script>
+    <script src="../static/js/filtrado.js"></script>
+</body>
+</html>

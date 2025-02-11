@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Actualizar Evento</title>
+    <link rel="stylesheet" href="../static/CSS/Agregar_evento.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Actualizar Evento</h1>
+
+        <!-- Formulario de actualización -->
+        <form action="/editar_evento/{{ evento[0] }}" method="POST">
+            <div class="form-container">
+                <div class="form-left">
+                    <label for="nombre">Nombre del Evento:</label>
+                    <input type="text" id="nombre" name="nombre" value="{{ evento[0] }}" required>
+
+                    <label for="descripcion">Descripción:</label>
+                    <textarea id="descripcion" name="descripcion" required>{{ evento[1] }}</textarea>
+
+                    <label for="direccion">Dirección:</label>
+                    <input type="text" id="direccion" name="direccion" value="{{ evento[2] }}" required>
+                </div>
+
+                <div class="form-right">
+                    <label for="fecha">Fecha:</label>
+                    <input type="date" id="fecha" name="fecha" value="{{ evento[3] }}" required>
+
+                    <label for="hora">Hora:</label>
+                    <input type="time" id="hora" name="hora" value="{{ evento[4] }}" required>
+                </div>
+            </div>
+
+            <div class="botones-finales">
+                <button type="submit" class="btn-enviar">Actualizar</button>
+            </div>
+        </form>
+    </div>
+</body>
+</html>

@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Actualizar Artista</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container mt-5">
+        <h1>Actualizar Artista</h1>
+        <!-- Mostrar mensajes flash -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+        
+        <form method="POST">
+            <div class="form-group">
+                <label for="nombreArtistico">Nombre Artístico</label>
+                <input type="text" class="form-control" id="nombreArtistico" name="nombreArtistico" 
+                    value="{{ artista[0] }}" placeholder="Ingrese nombre artístico">
+            </div>
+            <div class="form-group">
+                <label for="generoMusical">Género Musical</label>
+                <select class="form-control" id="generoMusical" name="generoMusical">
+                    <option value="Cumbia" {% if artista[1] == 'Cumbia' %}selected{% endif %}>Cumbia</option>
+                    <option value="Pop" {% if artista[1] == 'Pop' %}selected{% endif %}>Pop</option>
+                    <option value="Reggaeton" {% if artista[1] == 'Reggaeton' %}selected{% endif %}>Reggaeton</option>
+                    <option value="Merengue" {% if artista[1] == 'Merengue' %}selected{% endif %}>Merengue</option>
+                    <option value="Salsa" {% if artista[1] == 'Salsa' %}selected{% endif %}>Salsa</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="descripcion">Descripción</label>
+                <textarea class="form-control" id="descripcion" name="descripcion" rows="3">{{ artista[2] }}</textarea>
+            </div>
+            <button type="submit" class="btn btn-primary">Actualizar</button>
+        </form>             
+    </div>
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>

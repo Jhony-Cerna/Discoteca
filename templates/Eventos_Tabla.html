@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Eventos</title>
+    <link rel="stylesheet" href="../static/CSS/Eventos_Tabla.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Eventos</h1>
+
+        <a href="/agregar_evento">
+            <button class="btn-crear">Crear Registro</button>
+        </a>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Nombre</th>
+                    <th>Descripción</th>
+                    <th>Fecha</th>
+                    <th>Dirección</th>
+                    <th>Hora</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if eventos %}
+                    {% for evento in eventos %}
+                        <tr>
+                            <td>{{ evento[0] }}</td>  <!-- nombre_evento -->
+                            <td>{{ evento[1] }}</td>  <!-- descripcion -->
+                            <td>{{ evento[2] }}</td>  <!-- fecha -->
+                            <td>{{ evento[3] }}</td>  <!-- lugar -->
+                            <td>{{ evento[4] }}</td>  <!-- hora -->
+                            <td>
+                                <button class="btn-editar">Editar</button>
+                                <button class="btn-eliminar">Eliminar</button>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="6">No hay eventos registrados.</td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+    <script src="../static/js/edit-del_evento.js"></script>
+</body>
+</html>
