@@ -165,6 +165,12 @@ def editar_artista(id_artista):
             (nombre, genero, descripcion, id_artista)
         )
         mysql.connection.commit()
+
+        # Recargar los artistas en la sesión
+        cur.execute('SELECT id_artista, nombre FROM artistas')
+        artistas = cur.fetchall()
+        session['artistas'] = artistas
+
         cur.close()
 
         flash('Artista actualizado correctamente', 'success')
@@ -176,6 +182,30 @@ def editar_artista(id_artista):
     cur.close()
 
     return render_template('Actualizar_artista.html', artista=artista)
+
+
+@app.route('/obtener_artistas', methods=['GET'])
+def obtener_artistas():
+    cur = mysql.connection.cursor()
+    cur.execute('SELECT id_artista, nombre FROM artistas')
+    artistas = cur.fetchall()
+    cur.close()
+
+    # Convertir los datos a formato JSON
+    artistas_json = [{'id_artista': artista[0], 'nombre': artista[1]} for artista in artistas]
+    return jsonify(artistas_json)
+
+@app.route('/obtener_genero_artista/<int:id_artista>', methods=['GET'])
+def obtener_genero_artista(id_artista):
+    cur = mysql.connection.cursor()
+    cur.execute('SELECT genero_musical FROM artistas WHERE id_artista = %s', (id_artista,))
+    genero = cur.fetchone()
+    cur.close()
+
+    if genero:
+        return jsonify({'genero': genero[0]})
+    else:
+        return jsonify({'genero': 'Desconocido'})
 
 
 if __name__ == '__main__':
