@@ -33,10 +33,44 @@
                 </div>
             </div>
 
+            <!-- Tabla de artistas seleccionados -->
+            <h2>Artistas Seleccionados</h2>
+            <table id="tabla-artistas">
+                <thead>
+                    <tr>
+                        <th>Nombre</th>
+                        <th>Género</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if artistas %}
+                        {% for artista in artistas %}
+                            <tr>
+                                <td>{{ artista[1] }}</td>  <!-- Nombre del artista -->
+                                <td>{{ artista[2] }}</td>  <!-- Género del artista -->
+                                <td>
+                                    <button type="button" class="btn-editar" data-id="{{ artista[0] }}">Editar</button>
+                                    <button type="button" class="btn-eliminar">Eliminar</button>
+                                </td>
+                                <input type="hidden" name="artistas[]" value="{{ artista[0] }}">  <!-- ID del artista -->
+                            </tr>
+                        {% endfor %}
+                    {% else %}
+                        <tr>
+                            <td colspan="3">No hay artistas seleccionados.</td>
+                        </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+
             <div class="botones-finales">
                 <button type="submit" class="btn-enviar">Actualizar</button>
             </div>
         </form>
     </div>
+
+    <!-- Incluir el JavaScript -->
+    <script src="../static/js/agregar_artista.js"></script>
 </body>
 </html>
