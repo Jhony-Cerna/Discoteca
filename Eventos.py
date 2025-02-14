@@ -100,26 +100,13 @@ def editar_evento(nombre_evento):
     # OBTIENE LOS DATOS DEL EVENTO
     cur.execute('SELECT nombre_evento, descripcion, lugar, fecha, hora FROM eventos WHERE nombre_evento = %s', (nombre_evento,))
     evento = cur.fetchone()
+    cur.close()
 
     if not evento:
         flash('Evento no encontrado', 'danger')
-        cur.close()
         return redirect(url_for('eventos_tabla'))
 
-    # OBTIENE LOS ARTISTAS ASOCIADOS AL EVENTO (INCLUYENDO EL GÉNERO)
-    cur.execute('''
-        SELECT a.id_artista, a.nombre, a.genero_musical 
-        FROM artistas a
-        JOIN artistas_evento ae ON a.id_artista = ae.id_artista
-        JOIN eventos e ON ae.id_evento = e.id_evento
-        WHERE e.nombre_evento = %s
-    ''', (nombre_evento,))
-    artistas = cur.fetchall()
-
-    cur.close()
-
-    # PASA LOS DATOS DEL EVENTO Y LOS ARTISTAS A LA PLANTILLA
-    return render_template('Actualizar_evento.html', evento=evento, artistas=artistas)
+    return render_template('Actualizar_evento.html', evento=evento)
 
 
 
