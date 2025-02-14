@@ -1,9 +1,18 @@
 document.addEventListener("DOMContentLoaded", function () {
     document.querySelectorAll(".btn-editar").forEach(function (boton) {
         boton.addEventListener("click", function () {
-            const fila = this.closest("tr"); 
-            const nombreEvento = fila.cells[0].innerText; 
-            window.location.href = `/editar_evento/${encodeURIComponent(nombreEvento)}`;
+            const fila = this.closest("tr");
+            const nombreEvento = fila.cells[0].innerText; // Nombre del evento
+
+            // Obtener los artistas asociados al evento
+            fetch(`/obtener_artistas_evento/${encodeURIComponent(nombreEvento)}`)
+                .then(response => response.json())
+                .then(data => {
+                    const artistas = data.artistas; // Lista de artistas
+                    // Redirigir a la página de edición con los datos del evento y los artistas
+                    window.location.href = `/editar_evento/${encodeURIComponent(nombreEvento)}?artistas=${encodeURIComponent(JSON.stringify(artistas))}`;
+                })
+                .catch(error => console.error('Error al obtener los artistas:', error));
         });
     });
 
