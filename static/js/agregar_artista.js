@@ -2,6 +2,11 @@ document.addEventListener("DOMContentLoaded", function () {
     // Función para manejar la eliminación de artistas
     function manejarEliminacion(fila) {
         if (confirm("¿Estás seguro de que quieres eliminar este artista?")) {
+            const artistaId = fila.querySelector('input[name="artistas[]"]').value;
+            let artistasIds = JSON.parse(localStorage.getItem('artistasIds')) || [];
+            artistasIds = artistasIds.filter(id => id !== artistaId);
+            localStorage.setItem('artistasIds', JSON.stringify(artistasIds));
+
             const tabla = fila.closest('tbody');
             tabla.removeChild(fila);
         }
@@ -36,6 +41,13 @@ document.addEventListener("DOMContentLoaded", function () {
             const artistaNombre = select.options[select.selectedIndex].text;
 
             if (artistaId) {
+                // Verificar si el artista ya está en la tabla
+                const existingRow = document.querySelector(`#tabla-artistas input[value="${artistaId}"]`);
+                if (existingRow) {
+                    alert('Este artista ya ha sido agregado.');
+                    return;
+                }
+
                 // Obtener el género del artista desde el servidor
                 fetch(`/obtener_genero_artista/${artistaId}`)
                     .then(response => response.json())
@@ -59,8 +71,11 @@ document.addEventListener("DOMContentLoaded", function () {
 
                         // Guardar el ID del artista en el local storage
                         let artistasIds = JSON.parse(localStorage.getItem('artistasIds')) || [];
-                        artistasIds.push(artistaId);
-                        localStorage.setItem('artistasIds', JSON.stringify(artistasIds));
+
+                        if (!artistasIds.includes(artistaId)) {
+                            artistasIds.push(artistaId);
+                            localStorage.setItem('artistasIds', JSON.stringify(artistasIds));
+                        }
 
                         // Agregar eventos a los nuevos botones
                         nuevaFila.querySelector('.btn-eliminar').addEventListener('click', function () {
