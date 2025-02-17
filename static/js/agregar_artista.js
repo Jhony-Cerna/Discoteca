@@ -46,6 +46,7 @@ document.addEventListener("DOMContentLoaded", function () {
                         const nuevaFila = tabla.insertRow();
 
                         nuevaFila.innerHTML = `
+                            <td>${artistaId}</td>
                             <td>${artistaNombre}</td>
                             <td>${genero}</td>
                             <td><img src="https://via.placeholder.com/50" alt="Imagen Artista"></td>
@@ -55,6 +56,11 @@ document.addEventListener("DOMContentLoaded", function () {
                             </td>
                             <input type="hidden" name="artistas[]" value="${artistaId}">
                         `;
+
+                        // Guardar el ID del artista en el local storage
+                        let artistasIds = JSON.parse(localStorage.getItem('artistasIds')) || [];
+                        artistasIds.push(artistaId);
+                        localStorage.setItem('artistasIds', JSON.stringify(artistasIds));
 
                         // Agregar eventos a los nuevos botones
                         nuevaFila.querySelector('.btn-eliminar').addEventListener('click', function () {
@@ -70,4 +76,15 @@ document.addEventListener("DOMContentLoaded", function () {
             }
         });
     }
+
+    // Agregar artistas del local storage al formulario al enviar
+    const form = document.querySelector('form');
+    form.addEventListener('submit', function () {
+        const artistasIds = JSON.parse(localStorage.getItem('artistasIds')) || [];
+        const hiddenInput = document.createElement('input');
+        hiddenInput.type = 'hidden';
+        hiddenInput.name = 'artistas';
+        hiddenInput.value = JSON.stringify(artistasIds);
+        form.appendChild(hiddenInput);
+    });
 });

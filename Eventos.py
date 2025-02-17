@@ -2,13 +2,14 @@ import os
 from flask import Flask, render_template, request, redirect, url_for, flash, jsonify, session
 from werkzeug.utils import secure_filename
 from flask_mysqldb import MySQL
+import json
 
 app = Flask(__name__)
 
 # MySQL connection
 app.config['MYSQL_HOST'] = 'localhost'
 app.config['MYSQL_USER'] = 'root'
-app.config['MYSQL_PASSWORD'] = 'Kaniem108%'
+app.config['MYSQL_PASSWORD'] = ''
 app.config['MYSQL_DB'] = 'discoteca'
 mysql = MySQL(app)
 
@@ -26,6 +27,7 @@ def eventos_tabla():
     # Renderizar la plantilla Eventos_Tabla.html con los eventos
     return render_template('Eventos_Tabla.html', eventos=eventos)
 
+#agregar evento-----------
 @app.route('/agregar_evento', methods=['GET', 'POST'])
 def agregar_evento():
     if request.method == 'POST':
@@ -38,7 +40,7 @@ def agregar_evento():
         id_discoteca = 1  # Valor fijo según lo indicado
 
         # Obtener los artistas seleccionados
-        artistas_seleccionados = request.form.getlist('artistas[]')
+        artistas_seleccionados = json.loads(request.form.get('artistas', '[]'))
 
         # Insertar el evento en la tabla eventos
         cur = mysql.connection.cursor()

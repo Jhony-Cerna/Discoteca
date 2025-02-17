@@ -40,7 +40,7 @@ window.addEventListener('load', () => {
         savedData.artistas.forEach(artista => {
             const row = document.createElement('tr');
             row.innerHTML = `
-                <td>${artista.nombre}</td>
+                <td data-id="${artista.id}">${artista.nombre}</td>
                 <td>${artista.genero}</td>
                 <td>${artista.imagen}</td>
                 <td>
