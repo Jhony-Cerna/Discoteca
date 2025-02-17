@@ -18,19 +18,23 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     // Agregar eventos a los botones "Eliminar" y "Editar" en la tabla existente
-    document.querySelectorAll('#tabla-artistas .btn-eliminar').forEach(function (boton) {
-        boton.addEventListener('click', function () {
-            const fila = this.closest('tr');
-            manejarEliminacion(fila);
+    function agregarEventosBotones() {
+        document.querySelectorAll('#tabla-artistas .btn-eliminar').forEach(function (boton) {
+            boton.addEventListener('click', function () {
+                const fila = this.closest('tr');
+                manejarEliminacion(fila);
+            });
         });
-    });
 
-    document.querySelectorAll('#tabla-artistas .btn-editar').forEach(function (boton) {
-        boton.addEventListener('click', function () {
-            const artistaId = this.getAttribute('data-id');
-            manejarEdicion(artistaId);
+        document.querySelectorAll('#tabla-artistas .btn-editar').forEach(function (boton) {
+            boton.addEventListener('click', function () {
+                const artistaId = this.getAttribute('data-id');
+                manejarEdicion(artistaId);
+            });
         });
-    });
+    }
+
+    agregarEventosBotones();
 
     // Agregar eventos al botón "Agregar Artista" (si existe)
     const botonAgregar = document.getElementById('agregar-artista');
@@ -71,7 +75,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
                         // Guardar el ID del artista en el local storage
                         let artistasIds = JSON.parse(localStorage.getItem('artistasIds')) || [];
-
                         if (!artistasIds.includes(artistaId)) {
                             artistasIds.push(artistaId);
                             localStorage.setItem('artistasIds', JSON.stringify(artistasIds));

@@ -12,9 +12,10 @@ function saveFormData() {
     tableRows.forEach(row => {
         const cells = row.querySelectorAll('td');
         formData.artistas.push({
-            nombre: cells[0].innerText,
-            genero: cells[1].innerText,
-            imagen: cells[2].innerText
+            id: row.querySelector('input[name="artistas[]"]').value,
+            nombre: cells[1].innerText,
+            genero: cells[2].innerText,
+            imagen: cells[3].innerText
         });
     });
 
@@ -40,18 +41,30 @@ window.addEventListener('load', () => {
         savedData.artistas.forEach(artista => {
             const row = document.createElement('tr');
             row.innerHTML = `
-                <td data-id="${artista.id}">${artista.nombre}</td>
+                <td>${artista.id}</td>
+                <td>${artista.nombre}</td>
                 <td>${artista.genero}</td>
                 <td>${artista.imagen}</td>
                 <td>
-                    <button type="button" class="btn-editar">Editar</button>
+                    <button type="button" class="btn-editar" data-id="${artista.id}">Editar</button>
                     <button type="button" class="btn-eliminar">Eliminar</button>
                 </td>
+                <input type="hidden" name="artistas[]" value="${artista.id}">
             `;
             row.querySelector('.btn-eliminar').addEventListener('click', function () {
-                confirm('¿Estás seguro de que deseas eliminar este artista?');
-                row.remove();
-                saveFormData();
+                if (confirm('¿Estás seguro de que deseas eliminar este artista?')) {
+                    const artistaId = row.querySelector('input[name="artistas[]"]').value;
+                    let artistasIds = JSON.parse(localStorage.getItem('artistasIds')) || [];
+                    artistasIds = artistasIds.filter(id => id !== artistaId);
+                    localStorage.setItem('artistasIds', JSON.stringify(artistasIds));
+                    row.remove();
+                    saveFormData();
+                }
+            });
+
+            row.querySelector('.btn-editar').addEventListener('click', function () {
+                const artistaId = this.getAttribute('data-id');
+                window.location.href = `/editar-artista/${artistaId}`;
             });
 
             tbody.appendChild(row);
