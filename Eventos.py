@@ -2,6 +2,7 @@ import os
 from flask import Flask, render_template, request, redirect, url_for, flash, jsonify, session
 from werkzeug.utils import secure_filename
 from flask_mysqldb import MySQL
+import json
 
 app = Flask(__name__)
 
@@ -26,6 +27,7 @@ def eventos_tabla():
     # Renderizar la plantilla Eventos_Tabla.html con los eventos
     return render_template('Eventos_Tabla.html', eventos=eventos)
 
+#agregar evento-----------
 @app.route('/agregar_evento', methods=['GET', 'POST'])
 def agregar_evento():
     if request.method == 'POST':
@@ -38,7 +40,7 @@ def agregar_evento():
         id_discoteca = 1  # Valor fijo según lo indicado
 
         # Obtener los artistas seleccionados
-        artistas_seleccionados = request.form.getlist('artistas[]')
+        artistas_seleccionados = json.loads(request.form.get('artistas', '[]'))
 
         # Insertar el evento en la tabla eventos
         cur = mysql.connection.cursor()
@@ -100,26 +102,13 @@ def editar_evento(nombre_evento):
     # OBTIENE LOS DATOS DEL EVENTO
     cur.execute('SELECT nombre_evento, descripcion, lugar, fecha, hora FROM eventos WHERE nombre_evento = %s', (nombre_evento,))
     evento = cur.fetchone()
+    cur.close()
 
     if not evento:
         flash('Evento no encontrado', 'danger')
-        cur.close()
         return redirect(url_for('eventos_tabla'))
 
-    # OBTIENE LOS ARTISTAS ASOCIADOS AL EVENTO (INCLUYENDO EL GÉNERO)
-    cur.execute('''
-        SELECT a.id_artista, a.nombre, a.genero_musical 
-        FROM artistas a
-        JOIN artistas_evento ae ON a.id_artista = ae.id_artista
-        JOIN eventos e ON ae.id_evento = e.id_evento
-        WHERE e.nombre_evento = %s
-    ''', (nombre_evento,))
-    artistas = cur.fetchall()
-
-    cur.close()
-
-    # PASA LOS DATOS DEL EVENTO Y LOS ARTISTAS A LA PLANTILLA
-    return render_template('Actualizar_evento.html', evento=evento, artistas=artistas)
+    return render_template('Actualizar_evento.html', evento=evento)
 
 
 

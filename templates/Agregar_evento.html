@@ -1,11 +1,13 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Registrar Evento</title>
     <link rel="stylesheet" href="../static/CSS/Agregar_evento.css">
 </head>
+
 <body>
     <div class="container">
         <h1>Registrar Evento</h1>
@@ -19,7 +21,8 @@
                     <input type="text" id="nombre" name="nombre" placeholder="Ingrese el nombre del evento" required>
 
                     <label for="descripcion">Descripción:</label>
-                    <textarea id="descripcion" name="descripcion" placeholder="Ingrese una descripción" required></textarea>
+                    <textarea id="descripcion" name="descripcion" placeholder="Ingrese una descripción"
+                        required></textarea>
 
                     <label for="direccion">Dirección:</label>
                     <input type="text" id="direccion" name="direccion" placeholder="Ingrese la dirección" required>
@@ -40,17 +43,15 @@
             <div class="seleccion-artista">
                 <select id="artista">
                     {% for artista in artistas %}
-                        <option value="{{ artista[0] }}">{{ artista[1] }}</option>
+                    <option value="{{ artista[0] }}">{{ artista[1] }}</option>
                     {% else %}
-                        <option value="">No hay artistas disponibles</option>
+                    <option value="">No hay artistas disponibles</option>
                     {% endfor %}
                 </select>
 
                 <div class="buttons">
                     <button type="button" class="btn-crear-artista" id="agregar-artista">Agregar Artista</button>
-                    <a href="/artistas">
-                        <button type="button" class="btn-crear-artista">Crear Artista</button>
-                    </a>
+                    <a href="/artistas" id="crear-artista-link" class="btn-crear-artista">Crear Artista</a>
                 </div>
             </div>
 
@@ -58,6 +59,7 @@
             <table id="tabla-artistas">
                 <thead>
                     <tr>
+                        <th>ID</th>
                         <th>Nombre</th>
                         <th>Género Musical</th>
                         <th>Imagen</th>
@@ -77,5 +79,7 @@
         </form>
     </div>
     <script src="../static/js/agregar_artista.js"></script>
+    <script src="../static/js/persistencia_datos.js"></script>
 </body>
+
 </html>
