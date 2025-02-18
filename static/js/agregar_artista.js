@@ -14,6 +14,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // Función para manejar la edición de artistas
     function manejarEdicion(artistaId) {
+        saveFormData();
         window.location.href = `/editar-artista/${artistaId}`;
     }
 
@@ -75,6 +76,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
                         // Guardar el ID del artista en el local storage
                         let artistasIds = JSON.parse(localStorage.getItem('artistasIds')) || [];
+
                         if (!artistasIds.includes(artistaId)) {
                             artistasIds.push(artistaId);
                             localStorage.setItem('artistasIds', JSON.stringify(artistasIds));
@@ -94,15 +96,4 @@ document.addEventListener("DOMContentLoaded", function () {
             }
         });
     }
-
-    // Agregar artistas del local storage al formulario al enviar
-    const form = document.querySelector('form');
-    form.addEventListener('submit', function () {
-        const artistasIds = JSON.parse(localStorage.getItem('artistasIds')) || [];
-        const hiddenInput = document.createElement('input');
-        hiddenInput.type = 'hidden';
-        hiddenInput.name = 'artistas';
-        hiddenInput.value = JSON.stringify(artistasIds);
-        form.appendChild(hiddenInput);
-    });
 });

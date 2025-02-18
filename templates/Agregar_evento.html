@@ -71,6 +71,8 @@
                 </tbody>
             </table>
 
+            <input type="hidden" id="artistas-seleccionados" name="artistas">
+
             <!-- Botones finales -->
             <div class="botones-finales">
                 <button type="button" class="btn-imagenes">Imágenes</button>
@@ -80,6 +82,15 @@
     </div>
     <script src="../static/js/agregar_artista.js"></script>
     <script src="../static/js/persistencia_datos.js"></script>
+    <script>
+        document.querySelector('form').addEventListener('submit', function() {
+            const artistasSeleccionados = [];
+            document.querySelectorAll('#tabla-artistas input[name="artistas[]"]').forEach(input => {
+                artistasSeleccionados.push(input.value);
+            });
+            document.getElementById('artistas-seleccionados').value = JSON.stringify(artistasSeleccionados);
+        });
+    </script>
 </body>
 
 </html>

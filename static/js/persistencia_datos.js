@@ -22,6 +22,17 @@ function saveFormData() {
     localStorage.setItem('formData', JSON.stringify(formData));
 }
 
+function updateArtistInLocalStorage(artistId, updatedArtist) {
+    const savedData = JSON.parse(localStorage.getItem('formData'));
+    if (savedData) {
+        const artistIndex = savedData.artistas.findIndex(artista => artista.id === artistId);
+        if (artistIndex !== -1) {
+            savedData.artistas[artistIndex] = updatedArtist;
+            localStorage.setItem('formData', JSON.stringify(savedData));
+        }
+    }
+}
+
 document.getElementById('crear-artista-link').addEventListener('click', (e) => {
     e.preventDefault();
     saveFormData();
@@ -64,6 +75,7 @@ window.addEventListener('load', () => {
 
             row.querySelector('.btn-editar').addEventListener('click', function () {
                 const artistaId = this.getAttribute('data-id');
+                saveFormData();
                 window.location.href = `/editar-artista/${artistaId}`;
             });
 

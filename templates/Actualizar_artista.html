@@ -20,7 +20,8 @@
             {% endif %}
         {% endwith %}
         
-        <form method="POST">
+        <form method="POST" id="actualizar-artista-form">
+            <input type="hidden" id="artistaId" name="artistaId" value="{{ artista[3] }}">
             <div class="form-group">
                 <label for="nombreArtistico">Nombre Artístico</label>
                 <input type="text" class="form-control" id="nombreArtistico" name="nombreArtistico" 
@@ -40,11 +41,12 @@
                 <label for="descripcion">Descripción</label>
                 <textarea class="form-control" id="descripcion" name="descripcion" rows="3">{{ artista[2] }}</textarea>
             </div>
-            <button type="submit" class="btn btn-primary">Actualizar</button>
+            <button type="submit" class="btn btn-primary" onclick="actualizar()">Actualizar</button>
         </form>             
     </div>
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script src="../static/js/actualizar_artista.js"></script>
 </body>
 </html>
