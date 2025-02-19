@@ -95,3 +95,32 @@ document.addEventListener("DOMContentLoaded", () => {
         localStorage.removeItem(localStorageKey);
     }
 });
+
+document.getElementById('crear-artista').addEventListener('click', function() {
+    const nombre = document.getElementById('nombre').value;
+    const descripcion = document.getElementById('descripcion').value;
+    const direccion = document.getElementById('direccion').value;
+    const fecha = document.getElementById('fecha').value;
+    const hora = document.getElementById('hora').value;
+
+    const eventoData = {
+        nombre,
+        descripcion,
+        direccion,
+        fecha,
+        hora
+    };
+
+    localStorage.setItem('eventoData', JSON.stringify(eventoData));
+});
+
+window.addEventListener('load', function() {
+    const eventoData = JSON.parse(localStorage.getItem('eventoData'));
+    if (eventoData) {
+        document.getElementById('nombre').value = eventoData.nombre;
+        document.getElementById('descripcion').value = eventoData.descripcion;
+        document.getElementById('direccion').value = eventoData.direccion;
+        document.getElementById('fecha').value = eventoData.fecha;
+        document.getElementById('hora').value = eventoData.hora;
+    }
+});
