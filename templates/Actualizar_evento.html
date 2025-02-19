@@ -42,7 +42,7 @@
                 
                 <div class="buttons">
                     <button type="button" class="btn-crear-artista" id="agregar-artista">Agregar Artista</button>
-                    <a href="{{ url_for('artistas', next=request.url) }}" class="btn-crear-artista">Crear Artista</a>
+                    <a href="{{ url_for('artistas', next=request.url) }}" class="btn-crear-artista" id="crear-artista">Crear Artista</a>
                 </div>
             </div>
 
@@ -61,7 +61,11 @@
                             <td>{{ artista[1] }}</td>
                             <td>{{ artista[2] }}</td>
                             <td>
-                                <button type="button" class="btn-editar" data-id="{{ artista[0] }}">Editar</button>
+                                <button type="button" 
+                                    class="btn-editar" 
+                                    data-id="{{ artista[0] }}"
+                                    data-nombre-evento="{{ evento[2] }}">  <!-- Cambio clave aquí --> Editar
+                                    </button>
                                 <button type="button" class="btn-eliminar" data-id="{{ artista[0] }}">Eliminar</button>
                             </td>
                             <input type="hidden" name="artistas[]" value="{{ artista[0] }}">
@@ -81,5 +85,55 @@
     </div>
 
     <script src="../static/js/gestionar_artistas.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const savedData = localStorage.getItem('formData');
+            if (savedData) {
+                const formData = JSON.parse(savedData);
+                document.getElementById('nombre').value = formData.nombre;
+                document.getElementById('descripcion').value = formData.descripcion;
+                document.getElementById('direccion').value = formData.direccion;
+                document.getElementById('fecha').value = formData.fecha;
+                document.getElementById('hora').value = formData.hora;
+            }
+        });
+
+        document.getElementById('crear-artista').addEventListener('click', function() {
+            const formData = {
+                nombre: document.getElementById('nombre').value,
+                descripcion: document.getElementById('descripcion').value,
+                direccion: document.getElementById('direccion').value,
+                fecha: document.getElementById('fecha').value,
+                hora: document.getElementById('hora').value
+            };
+            localStorage.setItem('formData', JSON.stringify(formData));
+        });
+
+        document.querySelectorAll('.btn-editar').forEach(button => {
+    button.addEventListener('click', function() {
+        const nombreEvento = this.dataset.nombreEvento;  // Obtener del atributo data
+        const artistaId = this.dataset.id;
+        
+        // Validar nombre del evento
+        if (!nombreEvento) {
+            alert('Error: No se encontró el evento');
+            return;
+        }
+        
+        // Guardar datos del formulario
+        const formData = {
+            nombre: document.getElementById('nombre').value,
+            descripcion: document.getElementById('descripcion').value,
+            direccion: document.getElementById('direccion').value,
+            fecha: document.getElementById('fecha').value,
+            hora: document.getElementById('hora').value
+        };
+        localStorage.setItem('formData', JSON.stringify(formData));
+        
+        // Redirección con parámetros válidos
+        window.location.href = `/editar-artista/${artistaId}?redirect=editar_evento&nombre_evento=${encodeURIComponent(nombreEvento)}`;
+    });
+});
+    </script>
 </body>
 </html>

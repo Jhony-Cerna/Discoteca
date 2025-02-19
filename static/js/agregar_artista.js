@@ -53,6 +53,7 @@ document.addEventListener("DOMContentLoaded", () => {
         });
 
         fila.querySelector(".btn-editar").addEventListener("click", () => {
+            saveFormData();
             editarArtista(id);
         });
     }
@@ -93,5 +94,36 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function limpiarAlmacenamiento() {
         localStorage.removeItem(localStorageKey);
+    }
+});
+
+function saveFormData() {
+    const nombre = document.getElementById('nombre').value;
+    const descripcion = document.getElementById('descripcion').value;
+    const direccion = document.getElementById('direccion').value;
+    const fecha = document.getElementById('fecha').value;
+    const hora = document.getElementById('hora').value;
+
+    const eventoData = {
+        nombre,
+        descripcion,
+        direccion,
+        fecha,
+        hora
+    };
+
+    localStorage.setItem('eventoData', JSON.stringify(eventoData));
+}
+
+document.getElementById('crear-artista').addEventListener('click', saveFormData);
+
+window.addEventListener('load', function() {
+    const eventoData = JSON.parse(localStorage.getItem('eventoData'));
+    if (eventoData) {
+        document.getElementById('nombre').value = eventoData.nombre;
+        document.getElementById('descripcion').value = eventoData.descripcion;
+        document.getElementById('direccion').value = eventoData.direccion;
+        document.getElementById('fecha').value = eventoData.fecha;
+        document.getElementById('hora').value = eventoData.hora;
     }
 });

@@ -42,7 +42,7 @@
 
                 <div class="buttons">
                     <button type="button" id="agregar-artista">Agregar Artista</button>
-                    <a href="/artistas" class="btn-crear-artista">Crear Artista</a>
+                    <a href="/artistas" class="btn-crear-artista" id="crear-artista">Crear Artista</a>
                 </div>
             </div>
 
@@ -64,11 +64,48 @@
             <input type="hidden" name="artistas" id="artistas-seleccionados">
 
             <div class="botones-finales">
-                <button type="submit">Guardar Evento</button>
+                <button type="submit" onclick="localStorage.clear()">Guardar Evento</button>
             </div>
         </form>
     </div>
 
     <script src="../static/js/agregar_artista.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const savedData = localStorage.getItem('formData');
+            if (savedData) {
+                const formData = JSON.parse(savedData);
+                document.getElementById('nombre').value = formData.nombre;
+                document.getElementById('descripcion').value = formData.descripcion;
+                document.getElementById('direccion').value = formData.direccion;
+                document.getElementById('fecha').value = formData.fecha;
+                document.getElementById('hora').value = formData.hora;
+            }
+        });
+
+        document.getElementById('crear-artista').addEventListener('click', function() {
+            const formData = {
+                nombre: document.getElementById('nombre').value,
+                descripcion: document.getElementById('descripcion').value,
+                direccion: document.getElementById('direccion').value,
+                fecha: document.getElementById('fecha').value,
+                hora: document.getElementById('hora').value
+            };
+            localStorage.setItem('formData', JSON.stringify(formData));
+        });
+
+        document.querySelectorAll('.btn-editar').forEach(button => {
+            button.addEventListener('click', function() {
+                const formData = {
+                    nombre: document.getElementById('nombre').value,
+                    descripcion: document.getElementById('descripcion').value,
+                    direccion: document.getElementById('direccion').value,
+                    fecha: document.getElementById('fecha').value,
+                    hora: document.getElementById('hora').value
+                };
+                localStorage.setItem('formData', JSON.stringify(formData));
+            });
+        });
+    </script>
 </body>
 </html>

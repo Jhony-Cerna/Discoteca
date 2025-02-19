@@ -281,29 +281,25 @@ def editar_artista(id_artista):
     cur = mysql.connection.cursor()
 
     if request.method == 'POST':
-        # Obtener los datos del formulario
         nombre = request.form.get('nombreArtistico')
         genero = request.form.get('generoMusical')
         descripcion = request.form.get('descripcion')
 
-        # Actualizar el artista en la base de datos
         cur.execute(
             'UPDATE artistas SET nombre = %s, genero_musical = %s, descripcion = %s WHERE id_artista = %s',
             (nombre, genero, descripcion, id_artista)
         )
         mysql.connection.commit()
 
-        # Obtener el parámetro de redirección
-        redirect_to = request.args.get('redirect', 'agregar_evento')
+        # Obtener la URL anterior desde el formulario
+        redirect_to = request.form.get('redirect_to')
 
-        # Redirigir según el parámetro
-        if redirect_to == 'editar_evento':
-            nombre_evento = request.args.get('nombre_evento')  # Obtener el nombre del evento
-            flash('Artista actualizado correctamente', 'success')
-            return redirect(url_for('editar_evento', nombre_evento=nombre_evento))
-        else:
-            flash('Artista actualizado correctamente', 'success')
-            return redirect(url_for('agregar_evento'))
+        flash('Artista actualizado correctamente', 'success')
+        
+        # Redirigir a la página anterior si existe, de lo contrario, ir a agregar_evento
+        if redirect_to:
+            return redirect(redirect_to)
+        return redirect(url_for('agregar_evento'))
 
     # Obtener datos actuales del artista
     cur.execute('SELECT nombre, genero_musical, descripcion FROM artistas WHERE id_artista = %s', (id_artista,))
@@ -315,6 +311,8 @@ def editar_artista(id_artista):
         return redirect(url_for('agregar_evento'))
 
     return render_template('Actualizar_artista.html', artista=artista)
+
+
 
 
 @app.route('/obtener_artistas', methods=['GET'])
