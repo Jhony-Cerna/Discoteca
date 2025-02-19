@@ -62,6 +62,18 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function editarArtista(boton) {
         const idArtista = boton.dataset.id;
-        window.location.href = `/editar-artista/${idArtista}`;
+    
+        // Guardar la URL actual antes de ir a la página de edición
+        localStorage.setItem("url_anterior", window.location.href);
+    
+        // Redirigir con el parámetro de redirección
+        window.location.href = `/editar-artista/${idArtista}?redirect=editar_evento&nombre_evento=${encodeURIComponent(getNombreEvento())}`;
     }
+    
+    // Función para obtener el nombre del evento desde la URL
+    function getNombreEvento() {
+        const urlParams = new URLSearchParams(window.location.search);
+        return urlParams.get("nombre_evento") || "";
+    }
+    
 });

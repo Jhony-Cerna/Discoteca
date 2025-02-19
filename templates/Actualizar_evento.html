@@ -61,7 +61,11 @@
                             <td>{{ artista[1] }}</td>
                             <td>{{ artista[2] }}</td>
                             <td>
-                                <button type="button" class="btn-editar" data-id="{{ artista[0] }}">Editar</button>
+                                <button type="button" 
+                                    class="btn-editar" 
+                                    data-id="{{ artista[0] }}"
+                                    data-nombre-evento="{{ evento[2] }}">  <!-- Cambio clave aquí --> Editar
+                                    </button>
                                 <button type="button" class="btn-eliminar" data-id="{{ artista[0] }}">Eliminar</button>
                             </td>
                             <input type="hidden" name="artistas[]" value="{{ artista[0] }}">
@@ -106,17 +110,30 @@
         });
 
         document.querySelectorAll('.btn-editar').forEach(button => {
-            button.addEventListener('click', function() {
-                const formData = {
-                    nombre: document.getElementById('nombre').value,
-                    descripcion: document.getElementById('descripcion').value,
-                    direccion: document.getElementById('direccion').value,
-                    fecha: document.getElementById('fecha').value,
-                    hora: document.getElementById('hora').value
-                };
-                localStorage.setItem('formData', JSON.stringify(formData));
-            });
-        });
+    button.addEventListener('click', function() {
+        const nombreEvento = this.dataset.nombreEvento;  // Obtener del atributo data
+        const artistaId = this.dataset.id;
+        
+        // Validar nombre del evento
+        if (!nombreEvento) {
+            alert('Error: No se encontró el evento');
+            return;
+        }
+        
+        // Guardar datos del formulario
+        const formData = {
+            nombre: document.getElementById('nombre').value,
+            descripcion: document.getElementById('descripcion').value,
+            direccion: document.getElementById('direccion').value,
+            fecha: document.getElementById('fecha').value,
+            hora: document.getElementById('hora').value
+        };
+        localStorage.setItem('formData', JSON.stringify(formData));
+        
+        // Redirección con parámetros válidos
+        window.location.href = `/editar-artista/${artistaId}?redirect=editar_evento&nombre_evento=${encodeURIComponent(nombreEvento)}`;
+    });
+});
     </script>
 </body>
 </html>

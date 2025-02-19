@@ -9,6 +9,7 @@
 <body>
     <div class="container mt-5">
         <h1>Actualizar Artista</h1>
+
         <!-- Mostrar mensajes flash -->
         {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
@@ -19,13 +20,17 @@
                 {% endfor %}
             {% endif %}
         {% endwith %}
-        
+
         <form method="POST">
+            <!-- Campo oculto para la URL de redirección -->
+            <input type="hidden" name="redirect_to" id="redirect_to">
+
             <div class="form-group">
                 <label for="nombreArtistico">Nombre Artístico</label>
                 <input type="text" class="form-control" id="nombreArtistico" name="nombreArtistico" 
-                    value="{{ artista[0] }}" placeholder="Ingrese nombre artístico">
+                    value="{{ artista[0] }}" placeholder="Ingrese nombre artístico" required>
             </div>
+
             <div class="form-group">
                 <label for="generoMusical">Género Musical</label>
                 <select class="form-control" id="generoMusical" name="generoMusical">
@@ -36,14 +41,26 @@
                     <option value="Salsa" {% if artista[1] == 'Salsa' %}selected{% endif %}>Salsa</option>
                 </select>
             </div>
+
             <div class="form-group">
                 <label for="descripcion">Descripción</label>
-                <textarea class="form-control" id="descripcion" name="descripcion" rows="3">{{ artista[2] }}</textarea>
+                <textarea class="form-control" id="descripcion" name="descripcion" rows="3" required>{{ artista[2] }}</textarea>
             </div>
+
             <button type="submit" class="btn btn-primary">Actualizar</button>
+            <a href="javascript:history.back()" class="btn btn-secondary">Cancelar</a>
         </form>             
     </div>
-    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            // Guardar la URL anterior en el campo oculto
+            const previousPage = document.referrer;
+            document.getElementById("redirect_to").value = previousPage;
+        });
+    </script>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 </body>
