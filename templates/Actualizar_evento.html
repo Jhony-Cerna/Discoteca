@@ -42,7 +42,7 @@
                 
                 <div class="buttons">
                     <button type="button" class="btn-crear-artista" id="agregar-artista">Agregar Artista</button>
-                    <a href="{{ url_for('artistas', next=request.url) }}" class="btn-crear-artista">Crear Artista</a>
+                    <a href="{{ url_for('artistas', next=request.url) }}" class="btn-crear-artista" id="crear-artista">Crear Artista</a>
                 </div>
             </div>
 
@@ -81,5 +81,42 @@
     </div>
 
     <script src="../static/js/gestionar_artistas.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const savedData = localStorage.getItem('formData');
+            if (savedData) {
+                const formData = JSON.parse(savedData);
+                document.getElementById('nombre').value = formData.nombre;
+                document.getElementById('descripcion').value = formData.descripcion;
+                document.getElementById('direccion').value = formData.direccion;
+                document.getElementById('fecha').value = formData.fecha;
+                document.getElementById('hora').value = formData.hora;
+            }
+        });
+
+        document.getElementById('crear-artista').addEventListener('click', function() {
+            const formData = {
+                nombre: document.getElementById('nombre').value,
+                descripcion: document.getElementById('descripcion').value,
+                direccion: document.getElementById('direccion').value,
+                fecha: document.getElementById('fecha').value,
+                hora: document.getElementById('hora').value
+            };
+            localStorage.setItem('formData', JSON.stringify(formData));
+        });
+
+        document.querySelectorAll('.btn-editar').forEach(button => {
+            button.addEventListener('click', function() {
+                const formData = {
+                    nombre: document.getElementById('nombre').value,
+                    descripcion: document.getElementById('descripcion').value,
+                    direccion: document.getElementById('direccion').value,
+                    fecha: document.getElementById('fecha').value,
+                    hora: document.getElementById('hora').value
+                };
+                localStorage.setItem('formData', JSON.stringify(formData));
+            });
+        });
+    </script>
 </body>
 </html>
