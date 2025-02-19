@@ -10,30 +10,42 @@
     <div class="container">
         <h1>Actualizar Evento</h1>
 
-        <!-- Formulario de actualización -->
-        <form action="/editar_evento/{{ evento[0] }}" method="POST">
+        <form action="/editar_evento/{{ evento[2] }}" method="POST" id="form-actualizar">
             <div class="form-container">
                 <div class="form-left">
                     <label for="nombre">Nombre del Evento:</label>
-                    <input type="text" id="nombre" name="nombre" value="{{ evento[0] }}" required>
+                    <input type="text" id="nombre" name="nombre" value="{{ evento[2] }}" required>
 
                     <label for="descripcion">Descripción:</label>
-                    <textarea id="descripcion" name="descripcion" required>{{ evento[1] }}</textarea>
+                    <textarea id="descripcion" name="descripcion" required>{{ evento[3] }}</textarea>
 
                     <label for="direccion">Dirección:</label>
-                    <input type="text" id="direccion" name="direccion" value="{{ evento[2] }}" required>
+                    <input type="text" id="direccion" name="direccion" value="{{ evento[4] }}" required>
                 </div>
 
                 <div class="form-right">
                     <label for="fecha">Fecha:</label>
-                    <input type="date" id="fecha" name="fecha" value="{{ evento[3] }}" required>
+                    <input type="date" id="fecha" name="fecha" value="{{ evento[5] }}" required>
 
                     <label for="hora">Hora:</label>
-                    <input type="time" id="hora" name="hora" value="{{ evento[4] }}" required>
+                    <input type="time" id="hora" name="hora" value="{{ evento[6] }}" required>
                 </div>
             </div>
 
-            <!-- Tabla de artistas seleccionados -->
+            <h2>Seleccionar Artista</h2>
+            <div class="seleccion-artista">
+                <select id="artista">
+                    {% for artista in artistas %}
+                        <option value="{{ artista[0] }}">{{ artista[1] }}</option>
+                    {% endfor %}
+                </select>
+                
+                <div class="buttons">
+                    <button type="button" class="btn-crear-artista" id="agregar-artista">Agregar Artista</button>
+                    <a href="{{ url_for('artistas', next=request.url) }}" class="btn-crear-artista">Crear Artista</a>
+                </div>
+            </div>
+
             <h2>Artistas Seleccionados</h2>
             <table id="tabla-artistas">
                 <thead>
@@ -44,23 +56,21 @@
                     </tr>
                 </thead>
                 <tbody>
-                    {% if artistas %}
-                        {% for artista in artistas %}
-                            <tr>
-                                <td>{{ artista[1] }}</td>  <!-- Nombre del artista -->
-                                <td>{{ artista[2] }}</td>  <!-- Género del artista -->
-                                <td>
-                                    <button type="button" class="btn-editar" data-id="{{ artista[0] }}">Editar</button>
-                                    <button type="button" class="btn-eliminar">Eliminar</button>
-                                </td>
-                                <input type="hidden" name="artistas[]" value="{{ artista[0] }}">  <!-- ID del artista -->
-                            </tr>
-                        {% endfor %}
+                    {% for artista in artistas_asignados %}
+                        <tr>
+                            <td>{{ artista[1] }}</td>
+                            <td>{{ artista[2] }}</td>
+                            <td>
+                                <button type="button" class="btn-editar" data-id="{{ artista[0] }}">Editar</button>
+                                <button type="button" class="btn-eliminar" data-id="{{ artista[0] }}">Eliminar</button>
+                            </td>
+                            <input type="hidden" name="artistas[]" value="{{ artista[0] }}">
+                        </tr>
                     {% else %}
                         <tr>
                             <td colspan="3">No hay artistas seleccionados.</td>
                         </tr>
-                    {% endif %}
+                    {% endfor %}
                 </tbody>
             </table>
 
@@ -70,7 +80,6 @@
         </form>
     </div>
 
-    <!-- Incluir el JavaScript -->
-    <script src="../static/js/agregar_artista.js"></script>
+    <script src="../static/js/gestionar_artistas.js"></script>
 </body>
 </html>

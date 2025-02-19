@@ -1,34 +1,28 @@
 <!DOCTYPE html>
 <html lang="es">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Registrar Evento</title>
     <link rel="stylesheet" href="../static/CSS/Agregar_evento.css">
 </head>
-
 <body>
     <div class="container">
         <h1>Registrar Evento</h1>
 
-        <!-- Formulario de registro -->
         <form action="/agregar_evento" method="POST">
             <div class="form-container">
-                <!-- Parte izquierda del formulario -->
                 <div class="form-left">
                     <label for="nombre">Nombre del Evento:</label>
-                    <input type="text" id="nombre" name="nombre" placeholder="Ingrese el nombre del evento" required>
+                    <input type="text" id="nombre" name="nombre" required>
 
                     <label for="descripcion">Descripción:</label>
-                    <textarea id="descripcion" name="descripcion" placeholder="Ingrese una descripción"
-                        required></textarea>
+                    <textarea id="descripcion" name="descripcion" required></textarea>
 
                     <label for="direccion">Dirección:</label>
-                    <input type="text" id="direccion" name="direccion" placeholder="Ingrese la dirección" required>
+                    <input type="text" id="direccion" name="direccion" required>
                 </div>
 
-                <!-- Parte derecha del formulario -->
                 <div class="form-right">
                     <label for="fecha">Fecha:</label>
                     <input type="date" id="fecha" name="fecha" required>
@@ -38,48 +32,43 @@
                 </div>
             </div>
 
-            <!-- Selección de artistas -->
             <h2>Seleccionar Artista</h2>
             <div class="seleccion-artista">
                 <select id="artista">
                     {% for artista in artistas %}
-                    <option value="{{ artista[0] }}">{{ artista[1] }}</option>
-                    {% else %}
-                    <option value="">No hay artistas disponibles</option>
+                        <option value="{{ artista[0] }}">{{ artista[1] }}</option>
                     {% endfor %}
                 </select>
 
                 <div class="buttons">
-                    <button type="button" class="btn-crear-artista" id="agregar-artista">Agregar Artista</button>
-                    <a href="/artistas" id="crear-artista-link" class="btn-crear-artista">Crear Artista</a>
+                    <button type="button" id="agregar-artista">Agregar Artista</button>
+                    <a href="/artistas" class="btn-crear-artista">Crear Artista</a>
                 </div>
             </div>
 
-            <!-- Tabla de artistas agregados -->
+            <h2>Artistas Seleccionados</h2>
             <table id="tabla-artistas">
                 <thead>
                     <tr>
-                        <th>ID</th>
                         <th>Nombre</th>
-                        <th>Género Musical</th>
-                        <th>Imagen</th>
+                        <th>Género</th>
                         <th>Acciones</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <!-- Las filas de artistas se agregarán dinámicamente aquí -->
+                    <!-- Filas dinámicas -->
                 </tbody>
             </table>
 
-            <!-- Botones finales -->
+            <!-- Campo oculto único -->
+            <input type="hidden" name="artistas" id="artistas-seleccionados">
+
             <div class="botones-finales">
-                <button type="button" class="btn-imagenes">Imágenes</button>
-                <button type="submit" class="btn-enviar">Enviar</button>
+                <button type="submit">Guardar Evento</button>
             </div>
         </form>
     </div>
-    <script src="../static/js/agregar_artista.js"></script>
-    <script src="../static/js/persistencia_datos.js"></script>
-</body>
 
+    <script src="../static/js/agregar_artista.js"></script>
+</body>
 </html>

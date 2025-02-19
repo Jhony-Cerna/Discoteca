@@ -2,6 +2,7 @@ import os
 from flask import Flask, render_template, request, redirect, url_for, flash, jsonify, session
 from werkzeug.utils import secure_filename
 from flask_mysqldb import MySQL
+from urllib.parse import urlparse, urljoin
 import json
 
 app = Flask(__name__)
@@ -31,157 +32,287 @@ def eventos_tabla():
 @app.route('/agregar_evento', methods=['GET', 'POST'])
 def agregar_evento():
     if request.method == 'POST':
-        # Obtener los datos del formulario
-        nombre_evento = request.form.get('nombre')
-        descripcion = request.form.get('descripcion')
-        lugar = request.form.get('direccion')
-        fecha = request.form.get('fecha')
-        hora = request.form.get('hora')
-        id_discoteca = 1  # Valor fijo según lo indicado
+        try:
+            # Obtener datos del formulario
+            nombre_evento = request.form['nombre']
+            descripcion = request.form['descripcion']
+            lugar = request.form['direccion']
+            fecha = request.form['fecha']
+            hora = request.form['hora']
+            artistas_seleccionados = json.loads(request.form['artistas'])  # Lista de IDs
 
-        # Obtener los artistas seleccionados
-        artistas_seleccionados = json.loads(request.form.get('artistas', '[]'))
+            # Insertar evento
+            cur = mysql.connection.cursor()
+            cur.execute("""
+                INSERT INTO eventos 
+                (nombre_evento, descripcion, lugar, fecha, hora, id_discoteca) 
+                VALUES (%s, %s, %s, %s, %s, 1)
+            """, (nombre_evento, descripcion, lugar, fecha, hora))
+            
+            id_evento = cur.lastrowid
 
-        # Insertar el evento en la tabla eventos
-        cur = mysql.connection.cursor()
-        cur.execute(
-            'INSERT INTO eventos (nombre_evento, descripcion, lugar, fecha, hora, id_discoteca) VALUES (%s, %s, %s, %s, %s, %s)',
-            (nombre_evento, descripcion, lugar, fecha, hora, id_discoteca)
-        )
-        mysql.connection.commit()
+            # Insertar relaciones
+            for id_artista in artistas_seleccionados:
+                cur.execute("""
+                    INSERT INTO artistas_evento (id_evento, id_artista)
+                    VALUES (%s, %s)
+                """, (id_evento, id_artista))
 
-        # Obtener el id_evento recién creado
-        id_evento = cur.lastrowid
-
-        # Insertar las relaciones en la tabla artistas_evento
-        for id_artista in artistas_seleccionados:
-            cur.execute(
-                'INSERT INTO artistas_evento (id_evento, id_artista) VALUES (%s, %s)',
-                (id_evento, id_artista)
-            )
-        mysql.connection.commit()
-
-        cur.close()
-        flash('Evento y artistas guardados exitosamente', 'success')
+            mysql.connection.commit()
+            flash('Evento creado exitosamente', 'success')
+            
+        except Exception as e:
+            mysql.connection.rollback()
+            flash(f'Error: {str(e)}', 'danger')
+        finally:
+            cur.close()
         return redirect(url_for('eventos_tabla'))
 
-    # Si es GET, mostrar el formulario
-    artistas = session.get('artistas', [])
-    if not artistas:
-        cur = mysql.connection.cursor()
-        cur.execute('SELECT id_artista, nombre FROM artistas')
-        artistas = cur.fetchall()
-        cur.close()
-        session['artistas'] = artistas
-
+    # GET: Mostrar formulario
+    cur = mysql.connection.cursor()
+    cur.execute("SELECT id_artista, nombre FROM artistas")
+    artistas = cur.fetchall()
+    cur.close()
+    
     return render_template('agregar_evento.html', artistas=artistas)
 
 
+
+@app.route('/obtener_datos_artista/<int:id_artista>')
+def obtener_datos_artista(id_artista):
+    cur = mysql.connection.cursor()
+    cur.execute("SELECT nombre, genero_musical FROM artistas WHERE id_artista = %s", (id_artista,))
+    artista = cur.fetchone()
+    cur.close()
+    return jsonify({'nombre': artista[0], 'genero': artista[1]})
+
+
+
+# Editar evento
 @app.route('/editar_evento/<string:nombre_evento>', methods=['GET', 'POST'])
 def editar_evento(nombre_evento):
     cur = mysql.connection.cursor()
 
-    if request.method == 'POST':
-        nuevo_nombre = request.form.get('nombre')
-        descripcion = request.form.get('descripcion')
-        lugar = request.form.get('direccion')  # Corregido a 'lugar'
-        fecha = request.form.get('fecha')
-        hora = request.form.get('hora')
+    # Obtener datos del evento
+    cur.execute("SELECT * FROM eventos WHERE nombre_evento = %s", (nombre_evento,))
+    evento = cur.fetchone()
 
-        # ACTUALIZA LOS CAMPOS USANDO nombre_evento
-        cur.execute(
-            'UPDATE eventos SET nombre_evento = %s, descripcion = %s, lugar = %s, fecha = %s, hora = %s WHERE nombre_evento = %s',
-            (nuevo_nombre, descripcion, lugar, fecha, hora, nombre_evento)
-        )
+    if not evento:
+        return "Evento no encontrado", 404
+
+    # Obtener artistas
+    cur.execute("SELECT * FROM artistas")
+    artistas = cur.fetchall()
+
+    # Obtener artistas asignados
+    cur.execute("""
+        SELECT a.id_artista, a.nombre, a.genero_musical 
+        FROM artistas a 
+        INNER JOIN artistas_evento ae ON a.id_artista = ae.id_artista 
+        WHERE ae.id_evento = %s
+    """, (evento[0],))
+    artistas_asignados = cur.fetchall()
+
+    if request.method == 'POST':
+        # Actualizar datos del evento
+        nombre = request.form['nombre']
+        descripcion = request.form['descripcion']
+        direccion = request.form['direccion']
+        fecha = request.form['fecha']
+        hora = request.form['hora']
+        nuevos_artistas = request.form.getlist('artistas[]')
+
+        # Actualizar evento
+        cur.execute('''
+            UPDATE eventos SET 
+            nombre_evento = %s, 
+            descripcion = %s, 
+            lugar = %s, 
+            fecha = %s, 
+            hora = %s 
+            WHERE id_evento = %s
+        ''', (nombre, descripcion, direccion, fecha, hora, evento[0]))
+        
+        # Sincronizar artistas
+        artistas_actuales = [str(a[0]) for a in artistas_asignados]
+        
+        # Eliminar relaciones removidas
+        for id_artista in artistas_actuales:
+            if id_artista not in nuevos_artistas:
+                cur.execute('''
+                    DELETE FROM artistas_evento 
+                    WHERE id_evento = %s AND id_artista = %s
+                ''', (evento[0], id_artista))
+        
+        # Agregar nuevas relaciones
+        for id_artista in nuevos_artistas:
+            if id_artista not in artistas_actuales:
+                cur.execute('''
+                    INSERT INTO artistas_evento (id_evento, id_artista)
+                    VALUES (%s, %s)
+                ''', (evento[0], id_artista))
+        
+        mysql.connection.commit()
+        return redirect(url_for('eventos_tabla'))  # Asegúrate de tener esta ruta definida
+
+    return render_template('Actualizar_evento.html',
+                        evento=evento,
+                        artistas=artistas,
+                        artistas_asignados=artistas_asignados)
+
+
+
+# Nueva ruta para obtener artistas relacionados a un evento específico
+@app.route('/obtener_artistas_evento/<string:nombre_evento>')
+def obtener_artistas_evento(nombre_evento):
+    cur = mysql.connection.cursor()
+
+    # Obtener el ID del evento
+    cur.execute('SELECT id_evento FROM eventos WHERE nombre_evento = %s', (nombre_evento,))
+    resultado = cur.fetchone()
+
+    if not resultado:
+        return jsonify({'error': 'Evento no encontrado'}), 404
+
+    id_evento = resultado[0]
+
+    # Obtener artistas del evento
+    cur.execute("""
+        SELECT a.nombre 
+        FROM artistas_evento ae
+        JOIN artistas a ON ae.id_artista = a.id_artista
+        WHERE ae.id_evento = %s
+    """, (id_evento,))
+    artistas = [artista[0] for artista in cur.fetchall()]
+
+    cur.close()
+
+    return jsonify({'artistas': artistas})
+
+
+@app.route('/eliminar_evento/<nombre_evento>', methods=['POST'])
+def eliminar_evento(nombre_evento):
+    cur = mysql.connection.cursor()
+
+    try:
+        # Eliminar las relaciones en la tabla artistas_evento
+        cur.execute('DELETE FROM artistas_evento WHERE id_evento = (SELECT id_evento FROM eventos WHERE nombre_evento = %s)', (nombre_evento,))
+        
+        # Eliminar el evento de la tabla eventos
+        cur.execute('DELETE FROM eventos WHERE nombre_evento = %s', (nombre_evento,))
+        
         mysql.connection.commit()
         cur.close()
 
-        flash('Evento actualizado correctamente', 'success')
-        return redirect(url_for('eventos_tabla'))
-
-    # OBTIENE LOS DATOS DEL EVENTO
-    cur.execute('SELECT nombre_evento, descripcion, lugar, fecha, hora FROM eventos WHERE nombre_evento = %s', (nombre_evento,))
-    evento = cur.fetchone()
-    cur.close()
-
-    if not evento:
-        flash('Evento no encontrado', 'danger')
-        return redirect(url_for('eventos_tabla'))
-
-    return render_template('Actualizar_evento.html', evento=evento)
-
-
+        return jsonify({'success': True})
+    except Exception as e:
+        mysql.connection.rollback()
+        cur.close()
+        return jsonify({'success': False, 'error': str(e)})
+    
+#ARTISTAS
+def is_safe_url(target):
+    ref_url = urlparse(request.host_url)
+    test_url = urlparse(urljoin(request.host_url, target))
+    return test_url.scheme in ('http', 'https') and ref_url.netloc == test_url.netloc
 
 @app.route('/artistas', methods=['GET', 'POST'])
 def artistas():
-    if request.method == 'POST':
-        nombre_artistico = request.form.get('nombreArtistico')
-        genero_musical = request.form.get('generoMusical')
-        descripcion = request.form.get('descripcion')
+    next_url = request.args.get('next', '')
+    form_data = request.form if request.method == 'POST' else None
 
-        # Validar que todos los campos estén presentes
-        if not nombre_artistico or not genero_musical or not descripcion:
-            flash('Todos los campos son obligatorios', 'danger')
-            return redirect(url_for('artistas'))
+    try:
+        # Verificar y mantener conexión activa
+        if not mysql.connection.open:
+            mysql.connection.ping(reconnect=True)
+            
+        if request.method == 'POST':
+            # Validación de campos obligatorios
+            required_fields = ['nombreArtistico', 'generoMusical', 'descripcion']
+            if not all(request.form.get(field) for field in required_fields):
+                flash('Los campos marcados con * son obligatorios', 'danger')
+                return render_template('artistas.html',
+                                    next_url=next_url,
+                                    form_data=request.form)
 
-        # Insertar en la base de datos
-        cur = mysql.connection.cursor()
-        try:
-            cur.execute(
-                'INSERT INTO artistas (nombre, genero_musical, descripcion) VALUES (%s, %s, %s)',
-                (nombre_artistico, genero_musical, descripcion)
-            )
-            mysql.connection.commit()
-            flash('Artista agregado exitosamente', 'success')
-        except Exception as e:
-            mysql.connection.rollback()
-            flash(f'Error al agregar el artista: {str(e)}', 'danger')
-        finally:
-            cur.close()
+            try:
+                cur = mysql.connection.cursor()
+                
+                # Consulta actualizada sin columna imagen
+                cur.execute('''
+                    INSERT INTO artistas 
+                    (nombre, genero_musical, descripcion) 
+                    VALUES (%s, %s, %s)
+                ''', (
+                    request.form['nombreArtistico'],
+                    request.form['generoMusical'],
+                    request.form['descripcion']
+                ))
+                
+                mysql.connection.commit()
+                flash('Artista registrado exitosamente', 'success')
 
-        # Obtener la lista actualizada de artistas
-        cur = mysql.connection.cursor()
-        cur.execute('SELECT id_artista, nombre FROM artistas')
-        artistas = cur.fetchall()
-        cur.close()
+                # Redirección segura
+                safe_next_url = next_url if is_safe_url(next_url) else ''
+                return redirect(safe_next_url) if safe_next_url else redirect(url_for('agregar_evento'))
 
-        # Guardar la lista de artistas en la sesión
-        session['artistas'] = artistas
+            except Exception as e:
+                mysql.connection.rollback()
+                flash(f'Error al guardar el artista: {str(e)}', 'danger')
+                return render_template('artistas.html',
+                                    next_url=next_url,
+                                    form_data=request.form)
+            finally:
+                if 'cur' in locals(): cur.close()
 
-        # Redirigir a agregar_evento
-        return redirect(url_for('agregar_evento'))
+        # GET: Mostrar formulario
+        safe_next = next_url if is_safe_url(next_url) else ''
+        return render_template('artistas.html',
+                            next_url=safe_next,
+                            form_data=form_data)
 
-    return render_template('artistas.html')
+    except Exception as e:
+        flash(f'Error de conexión: {str(e)}', 'danger')
+        mysql.connection.ping(reconnect=True)
+        return redirect(request.url)
 
 @app.route('/editar-artista/<int:id_artista>', methods=['GET', 'POST'])
 def editar_artista(id_artista):
     cur = mysql.connection.cursor()
 
     if request.method == 'POST':
+        # Obtener los datos del formulario
         nombre = request.form.get('nombreArtistico')
         genero = request.form.get('generoMusical')
         descripcion = request.form.get('descripcion')
 
+        # Actualizar el artista en la base de datos
         cur.execute(
             'UPDATE artistas SET nombre = %s, genero_musical = %s, descripcion = %s WHERE id_artista = %s',
             (nombre, genero, descripcion, id_artista)
         )
         mysql.connection.commit()
 
-        # Recargar los artistas en la sesión
-        cur.execute('SELECT id_artista, nombre FROM artistas')
-        artistas = cur.fetchall()
-        session['artistas'] = artistas
+        # Obtener el parámetro de redirección
+        redirect_to = request.args.get('redirect', 'agregar_evento')
 
-        cur.close()
-
-        flash('Artista actualizado correctamente', 'success')
-        return redirect(url_for('agregar_evento'))
+        # Redirigir según el parámetro
+        if redirect_to == 'editar_evento':
+            nombre_evento = request.args.get('nombre_evento')  # Obtener el nombre del evento
+            flash('Artista actualizado correctamente', 'success')
+            return redirect(url_for('editar_evento', nombre_evento=nombre_evento))
+        else:
+            flash('Artista actualizado correctamente', 'success')
+            return redirect(url_for('agregar_evento'))
 
     # Obtener datos actuales del artista
     cur.execute('SELECT nombre, genero_musical, descripcion FROM artistas WHERE id_artista = %s', (id_artista,))
     artista = cur.fetchone()
     cur.close()
+
+    if not artista:
+        flash('Artista no encontrado', 'danger')
+        return redirect(url_for('agregar_evento'))
 
     return render_template('Actualizar_artista.html', artista=artista)
 
@@ -197,18 +328,15 @@ def obtener_artistas():
     artistas_json = [{'id_artista': artista[0], 'nombre': artista[1]} for artista in artistas]
     return jsonify(artistas_json)
 
-@app.route('/obtener_genero_artista/<int:id_artista>', methods=['GET'])
+
+@app.route('/obtener_genero_artista/<int:id_artista>')
 def obtener_genero_artista(id_artista):
     cur = mysql.connection.cursor()
-    cur.execute('SELECT genero_musical FROM artistas WHERE id_artista = %s', (id_artista,))
-    genero = cur.fetchone()
+    cur.execute("SELECT genero_musical FROM artistas WHERE id_artista = %s", (id_artista,))
+    genero = cur.fetchone()[0]
     cur.close()
+    return jsonify({'genero': genero})
 
-    if genero:
-        return jsonify({'genero': genero[0]})
-    else:
-        return jsonify({'genero': 'Desconocido'})
-
-
+    
 if __name__ == '__main__':
     app.run(port=3000, debug=True)

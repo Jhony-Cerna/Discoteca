@@ -9,43 +9,64 @@
 <body>
     <div class="container mt-5">
         <h1>Agregar Artista</h1>
-        <!-- Mostrar mensajes flash -->
+        
+        <!-- Mensajes Flash -->
         {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
                 {% for category, message in messages %}
-                    <div class="alert alert-{{ category }}">
+                    <div class="alert alert-{{ category }} alert-dismissible fade show">
                         {{ message }}
+                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
                     </div>
                 {% endfor %}
             {% endif %}
         {% endwith %}
         
+        <!-- Formulario -->
         <form method="POST" enctype="multipart/form-data">
+            <input type="hidden" name="next" value="{{ next_url }}">
+            
             <div class="form-group">
-                <label for="nombreArtistico">Nombre Artístico</label>
-                <input type="text" class="form-control" id="nombreArtistico" name="nombreArtistico" placeholder="Ingrese nombre artístico">
+                <label for="nombreArtistico">Nombre Artístico *</label>
+                <input type="text" class="form-control" id="nombreArtistico" 
+                    name="nombreArtistico" required 
+                    value="{% if form_data %}{{ form_data.nombreArtistico }}{% endif %}">
             </div>
+            
             <div class="form-group">
-                <label for="generoMusical">Género Musical</label>
-                <select class="form-control" id="generoMusical" name="generoMusical">
-                    <option>Cumbia</option>
-                    <option>Pop</option>
-                    <option>Reggaeton</option>
-                    <option>Merengue</option>
-                    <option>Salsa</option>
+                <label for="generoMusical">Género Musical *</label>
+                <select class="form-control" id="generoMusical" name="generoMusical" required>
+                    <option value="">Seleccione un género</option>
+                    <option value="Cumbia" {% if form_data and form_data.generoMusical == 'Cumbia' %}selected{% endif %}>Cumbia</option>
+                    <option value="Pop" {% if form_data and form_data.generoMusical == 'Pop' %}selected{% endif %}>Pop</option>
+                    <option value="Reggaeton" {% if form_data and form_data.generoMusical == 'Reggaeton' %}selected{% endif %}>Reggaeton</option>
+                    <option value="Merengue" {% if form_data and form_data.generoMusical == 'Merengue' %}selected{% endif %}>Merengue</option>
+                    <option value="Salsa" {% if form_data and form_data.generoMusical == 'Salsa' %}selected{% endif %}>Salsa</option>
                 </select>
             </div>
+            
             <div class="form-group">
-                <label for="descripcion">Descripción</label>
-                <textarea class="form-control" id="descripcion" name="descripcion" rows="3" placeholder="Ingrese una descripción"></textarea>
+                <label for="descripcion">Descripción *</label>
+                <textarea class="form-control" id="descripcion" name="descripcion" 
+                        rows="3" required>{% if form_data %}{{ form_data.descripcion }}{% endif %}</textarea>
             </div>
+            
             <div class="form-group">
-                <label for="imagen">Agregar Imagen</label>
-                <input type="file" class="form-control-file" id="imagen" name="imagen">
+                <label for="imagen">Imagen del Artista (opcional)</label>
+                <input type="file" class="form-control-file" id="imagen" name="imagen" disabled>
+                <small class="text-muted">Funcionalidad de imágenes temporalmente deshabilitada</small>
             </div>
-            <button type="submit" class="btn btn-primary">Enviar</button>
-        </form>        
+            
+            <div class="form-group">
+                <button type="submit" class="btn btn-primary">Guardar Artista</button>
+                <a href="{{ next_url if next_url else url_for('agregar_evento') }}" 
+                class="btn btn-secondary">Cancelar</a>
+            </div>
+        </form>
     </div>
+
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
