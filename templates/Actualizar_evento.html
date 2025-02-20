@@ -35,6 +35,7 @@
             <h2>Seleccionar Artista</h2>
             <div class="seleccion-artista">
                 <select id="artista">
+                    <option value="">-- Seleccione un Artista --</option>
                     {% for artista in artistas %}
                         <option value="{{ artista[0] }}">{{ artista[1] }}</option>
                     {% endfor %}
