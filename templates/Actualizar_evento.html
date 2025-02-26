@@ -62,13 +62,10 @@
                             <td>{{ artista[1] }}</td>
                             <td>{{ artista[2] }}</td>
                             <td>
-                                <button type="button" 
-                                    class="btn-editar" 
-                                    data-id="{{ artista[0] }}"
-                                    data-nombre-evento="{{ evento[2] }}">  <!-- Cambio clave aquí --> Editar
-                                    </button>
+                                <a href="{{ url_for('editar_artista', id_artista=artista[0]) }}" class="btn btn-warning">Editar</a>
                                 <button type="button" class="btn-eliminar" data-id="{{ artista[0] }}">Eliminar</button>
                             </td>
+                            
                             <input type="hidden" name="artistas[]" value="{{ artista[0] }}">
                         </tr>
                     {% else %}

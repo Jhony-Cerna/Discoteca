@@ -316,3 +316,5 @@ CREATE TABLE IF NOT EXISTS reconocimientos (
     FOREIGN KEY (id_cliente) REFERENCES clientes(id_persona) ON DELETE CASCADE,
     FOREIGN KEY (id_criterio) REFERENCES criterios_calificacion(id_criterio) ON DELETE CASCADE
 );
+
+

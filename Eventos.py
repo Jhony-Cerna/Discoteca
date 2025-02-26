@@ -4,6 +4,7 @@ from werkzeug.utils import secure_filename
 from flask_mysqldb import MySQL
 from urllib.parse import urlparse, urljoin
 import json
+import MySQLdb  # Asegúrate de importar esto arriba
 
 app = Flask(__name__)
 
@@ -310,7 +311,8 @@ def editar_artista(id_artista):
         flash('Artista no encontrado', 'danger')
         return redirect(url_for('agregar_evento'))
 
-    return render_template('Actualizar_artista.html', artista=artista)
+    return render_template('Actualizar_artista.html', artista=artista, id_artista=id_artista)
+
 
 
 
@@ -335,6 +337,74 @@ def obtener_genero_artista(id_artista):
     cur.close()
     return jsonify({'genero': genero})
 
+#AQUI EMPIEZO CON LA PARTE DE REDES SOCIALES:
+
+
+@app.route('/redes_sociales/<int:id_artista>')
+def redes_sociales(id_artista):
+    cur = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+    cur.execute("""
+        SELECT l.id_link, l.nombre_referencia, d.tipo_link, d.descripcion, d.url
+        FROM links l
+        LEFT JOIN detalle_link d ON l.id_link = d.id_link
+        WHERE l.id_referencia = %s
+    """, (id_artista,))
     
+    redes = cur.fetchall()
+    cur.close()
+    
+    print(redes)  # 🔥 Imprime en consola para verificar si realmente trae datos
+    
+    return render_template('Tabla_RedSocial.html', id_artista=id_artista, redes=redes)
+
+
+
+@app.route('/register_RedSocial/<int:id_artista>')
+def register_RedSocial(id_artista):
+    return render_template('Red_social.html', id_artista=id_artista)
+
+
+@app.route('/guardar_red_social', methods=['POST'])
+def guardar_red_social():
+    id_artista = request.form['id_artista']
+    nombre_referencia = request.form['nombre_referencia']
+    tipo_link = request.form['tipo_link']
+    url = request.form['url']
+    descripcion = request.form.get('descripcion', '')  # Puede estar vacío
+    id_discoteca = 1  # ⚠️ Debes obtener el id_discoteca correcto
+
+    cur = mysql.connection.cursor()
+
+    try:
+        # 1️⃣ Insertar en `links` y obtener el `id_link`
+        cur.execute("""
+            INSERT INTO links (id_referencia, nombre_referencia, id_discoteca)
+            VALUES (%s, %s, %s)
+        """, (id_artista, nombre_referencia, id_discoteca))
+        mysql.connection.commit()  # Confirmar inserción en `links`
+        id_link = cur.lastrowid  # Obtener el ID generado
+
+        # 2️⃣ Insertar en `detalle_link` usando el `id_link`
+        cur.execute("""
+            INSERT INTO detalle_link (id_link, tipo_link, descripcion, url)
+            VALUES (%s, %s, %s, %s)
+        """, (id_link, tipo_link, descripcion, url))
+        mysql.connection.commit()  # Confirmar inserción en `detalle_link`
+
+        flash('Red social guardada con éxito', 'success')
+
+    except Exception as e:
+        mysql.connection.rollback()  # Deshacer cambios si hay error
+        flash(f'Error al guardar: {str(e)}', 'danger')
+
+    finally:
+        cur.close()
+
+    # Redirigir a la ruta de redes_sociales con el id_artista
+        return redirect(url_for('redes_sociales', id_artista=id_artista))
+
+
+
+
 if __name__ == '__main__':
     app.run(port=3000, debug=True)
