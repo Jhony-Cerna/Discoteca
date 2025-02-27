@@ -20,6 +20,7 @@
                         <th>Tipo</th>
                         <th>Descripción</th>
                         <th>URL</th>
+                        <th>Acciones</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -30,6 +31,11 @@
                         <td>{{ red.tipo_link }}</td>
                         <td>{{ red.descripcion }}</td>
                         <td><a href="{{ red.url }}" target="_blank">{{ red.url|truncate(30) }}</a></td>
+                        <td class="acciones-btns">
+                            <a href="{{ url_for('editar_red_social', id_link=red.id_link) }}" class="btn-editar">Editar</a>
+                            <a href="{{ url_for('eliminar_red_social', id_link=red.id_link) }}" class="btn-eliminar" onclick="return confirm('¿Estás seguro de eliminar este registro?')">Eliminar</a>
+                        </td>
+                        
                     </tr>
                     {% endfor %}
                 </tbody>

@@ -402,6 +402,93 @@ def guardar_red_social():
 
     # Redirigir a la ruta de redes_sociales con el id_artista
         return redirect(url_for('redes_sociales', id_artista=id_artista))
+    
+
+#ACTUALIZAMOS LOS REGISTROS:
+
+# Ruta para cargar el formulario con los datos actuales
+@app.route('/editar_red_social/<int:id_link>')
+def editar_red_social(id_link):
+    cur = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+    cur.execute("""
+        SELECT l.id_link, l.id_referencia, l.nombre_referencia, d.tipo_link, d.descripcion, d.url
+        FROM links l
+        LEFT JOIN detalle_link d ON l.id_link = d.id_link
+        WHERE l.id_link = %s
+    """, (id_link,))
+    
+    red_social = cur.fetchone()
+    cur.close()
+
+    if not red_social:
+        flash('Red social no encontrada', 'danger')
+        return redirect(url_for('redes_sociales', id_artista=1))  # 🔥 Asegurar el id_artista correcto
+
+    return render_template('Actualizar_RedSocial.html', red_social=red_social)
+
+
+# Ruta para actualizar la red social
+@app.route('/actualizar_red_social/<int:id_link>', methods=['POST'])
+def actualizar_red_social(id_link):
+    nombre_referencia = request.form['nombre_referencia']
+    tipo_link = request.form['tipo_link']
+    url = request.form['url']
+    descripcion = request.form.get('descripcion', '')
+
+    cur = mysql.connection.cursor()
+    
+    try:
+        # Actualizar en `links`
+        cur.execute("""
+            UPDATE links
+            SET nombre_referencia = %s
+            WHERE id_link = %s
+        """, (nombre_referencia, id_link))
+        
+        # Actualizar en `detalle_link`
+        cur.execute("""
+            UPDATE detalle_link
+            SET tipo_link = %s, descripcion = %s, url = %s
+            WHERE id_link = %s
+        """, (tipo_link, descripcion, url, id_link))
+
+        mysql.connection.commit()
+        flash('Red social actualizada con éxito', 'success')
+
+    except Exception as e:
+        mysql.connection.rollback()
+        flash(f'Error al actualizar: {str(e)}', 'danger')
+
+    finally:
+        cur.close()
+
+    return redirect(url_for('redes_sociales', id_artista=1))  # 🔥 Ajusta el `id_artista` según sea necesario
+
+
+# Ruta para eliminar una red social
+@app.route('/eliminar_red_social/<int:id_link>')
+def eliminar_red_social(id_link):
+    cur = mysql.connection.cursor()
+
+    try:
+        # Primero eliminamos de `detalle_link` (por integridad referencial)
+        cur.execute("DELETE FROM detalle_link WHERE id_link = %s", (id_link,))
+        # Luego eliminamos de `links`
+        cur.execute("DELETE FROM links WHERE id_link = %s", (id_link,))
+
+        mysql.connection.commit()
+        flash('Red social eliminada con éxito', 'success')
+
+    except Exception as e:
+        mysql.connection.rollback()
+        flash(f'Error al eliminar: {str(e)}', 'danger')
+
+    finally:
+        cur.close()
+
+    return redirect(url_for('redes_sociales', id_artista=1))  # 🔥 Ajusta el `id_artista`
+
+
 
 
 
