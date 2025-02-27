@@ -314,9 +314,6 @@ def editar_artista(id_artista):
     return render_template('Actualizar_artista.html', artista=artista, id_artista=id_artista)
 
 
-
-
-
 @app.route('/obtener_artistas', methods=['GET'])
 def obtener_artistas():
     cur = mysql.connection.cursor()
@@ -337,9 +334,9 @@ def obtener_genero_artista(id_artista):
     cur.close()
     return jsonify({'genero': genero})
 
+
+
 #AQUI EMPIEZO CON LA PARTE DE REDES SOCIALES:
-
-
 @app.route('/redes_sociales/<int:id_artista>')
 def redes_sociales(id_artista):
     cur = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
@@ -352,8 +349,6 @@ def redes_sociales(id_artista):
     
     redes = cur.fetchall()
     cur.close()
-    
-    print(redes)  # 🔥 Imprime en consola para verificar si realmente trae datos
     
     return render_template('Tabla_RedSocial.html', id_artista=id_artista, redes=redes)
 
@@ -370,21 +365,20 @@ def guardar_red_social():
     nombre_referencia = request.form['nombre_referencia']
     tipo_link = request.form['tipo_link']
     url = request.form['url']
-    descripcion = request.form.get('descripcion', '')  # Puede estar vacío
-    id_discoteca = 1  # ⚠️ Debes obtener el id_discoteca correcto
+    descripcion = request.form.get('descripcion', '')
+    id_discoteca = 1
 
     cur = mysql.connection.cursor()
 
     try:
-        # 1️⃣ Insertar en `links` y obtener el `id_link`
+        
         cur.execute("""
             INSERT INTO links (id_referencia, nombre_referencia, id_discoteca)
             VALUES (%s, %s, %s)
         """, (id_artista, nombre_referencia, id_discoteca))
         mysql.connection.commit()  # Confirmar inserción en `links`
         id_link = cur.lastrowid  # Obtener el ID generado
-
-        # 2️⃣ Insertar en `detalle_link` usando el `id_link`
+        
         cur.execute("""
             INSERT INTO detalle_link (id_link, tipo_link, descripcion, url)
             VALUES (%s, %s, %s, %s)
@@ -399,11 +393,7 @@ def guardar_red_social():
 
     finally:
         cur.close()
-
-    # Redirigir a la ruta de redes_sociales con el id_artista
         return redirect(url_for('redes_sociales', id_artista=id_artista))
-
-
 
 
 if __name__ == '__main__':
